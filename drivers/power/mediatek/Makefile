@@ -11,6 +11,7 @@
 # GNU General Public License for more details.
 #
 
+obj-$(CONFIG_THUNDERCHARGE_CONTROL) += thundercharge_control.o
 
 MTK_PLATFORM := $(subst ",,$(CONFIG_MTK_PLATFORM))
 subdir-ccflags-y += -Werror -I$(srctree)/drivers/misc/mediatek/include
