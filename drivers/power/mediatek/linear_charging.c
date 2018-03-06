@@ -934,8 +934,14 @@ void select_charging_curret(void)
 			}
 #else
 			{
-
-				g_temp_CC_value = batt_cust_data.usb_charger_current;
+#ifdef CONFIG_THUNDERCHARGE_CONTROL
+				if(mswitch)
+					g_temp_CC_value_linear = custom_usb_current;
+				else
+                                        g_temp_CC_value = batt_cust_data.usb_charger_current;
+#else
+		g_temp_CC_value = batt_cust_data.usb_charger_current;
+#endif
 #if defined(CONFIG_ARM64)
 				if (strncmp(CONFIG_BUILD_ARM64_APPENDED_DTB_IMAGE_NAMES,
 				    "k35v1_64_om_lwctg", 17) == 0)
@@ -956,31 +962,29 @@ void select_charging_curret(void)
 				if (strncmp(CONFIG_BUILD_ARM_APPENDED_DTB_IMAGE_NAMES,
 				    "k35v1_gmo_cnop_lwctg_512_35m", 28) == 0)
 					g_temp_CC_value = batt_cust_data.ac_charger_current;
-#ifdef CONFIG_THUNDERCHARGE_CONTROL
-				g_temp_CC_value_linear = custom_usb_current;
-#else
-				g_temp_CC_value_linear = cur_usb_charger;
-#endif
 			}
 #endif
 		} else if (BMT_status.charger_type == NONSTANDARD_CHARGER) {
-			g_temp_CC_value = batt_cust_data.non_std_ac_charger_current;
+#ifdef CONFIG_THUNDERCHARGE_CONTROL
+                                if(mswitch)
+                                        g_temp_CC_value_linear = custom_ac_current;
+                                else
+                                        g_temp_CC_value = batt_cust_data.non_std_ac_charger_current;
+#else
+		g_temp_CC_value = batt_cust_data.non_std_ac_charger_current;
+#endif
 		} else if (BMT_status.charger_type == STANDARD_CHARGER) {
-			g_temp_CC_value = batt_cust_data.ac_charger_current;
+#ifdef CONFIG_THUNDERCHARGE_CONTROL
+                                if(mswitch)
+                                        g_temp_CC_value_linear = custom_ac_current;
+                                else
+                                        g_temp_CC_value = batt_cust_data.ac_charger_current;
+#else
+		g_temp_CC_value = batt_cust_data.ac_charger_current;
+#endif
 #if defined(CONFIG_MTK_PUMP_EXPRESS_SUPPORT)
 			if (is_ta_connect == KAL_TRUE && ta_vchr_tuning == KAL_TRUE)
 				g_temp_CC_value = CHARGE_CURRENT_1500_00_MA;
-#ifdef CONFIG_THUNDERCHARGE_CONTROL
-			g_temp_CC_value_linear = custom_ac_current;
-#else
-			g_temp_CC_value_linear = cur_no_std_charger;
-#endif
-		} else if (BMT_status.charger_type == STANDARD_CHARGER) {
-#ifdef CONFIG_THUNDERCHARGE_CONTROL
-			g_temp_CC_value_linear = custom_ac_current;
-#else
-			g_temp_CC_value_linear = cur_ac_charger;
-#endif
 		} else if (BMT_status.charger_type == CHARGING_HOST) {
 			g_temp_CC_value = batt_cust_data.charging_host_charger_current;
 		} else if (BMT_status.charger_type == APPLE_2_1A_CHARGER) {
