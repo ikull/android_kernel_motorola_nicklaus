@@ -27,6 +27,12 @@
 #include <linux/uaccess.h>
 #include <linux/fb.h>
 
+#ifdef CONFIG_TOUCHSCREEN_PREVENT_SLEEP
+#ifdef CONFIG_TOUCHSCREEN_DOUBLETAP2WAKE
+#include <linux/input/doubletap2wake.h>
+#endif
+#endif
+
 #ifdef CONFIG_COMPAT
 #include <linux/compat.h>
 #endif
@@ -332,6 +338,13 @@ static int tpd_remove(struct platform_device *pdev);
 static struct work_struct tpd_init_work;
 static struct workqueue_struct *tpd_init_workqueue;
 static int tpd_suspend_flag;
+
+#ifdef CONFIG_TOUCHSCREEN_PREVENT_SLEEP
+#include <cust_eint.h>
+void (*nyx_suspend) (struct early_suspend *h);
+void (*nyx_resume) (struct early_suspend *h);
+#endif
+
 int tpd_register_flag = 0;
 /* global variable definitions */
 struct tpd_device *tpd = 0;
@@ -430,6 +443,65 @@ static void tpd_create_attributes(struct device *dev, struct tpd_attrs *attrs)
 	for (; num > 0;)
 		device_create_file(dev, attrs->attr[--num]);
 }
+
+#ifdef CONFIG_TOUCHSCREEN_PREVENT_SLEEP
+
+static void eros_suspend(struct early_suspend *h) {
+#if defined(CONFIG_TOUCHSCREEN_DOUBLETAP2WAKE)
+	bool prevent_sleep = false;
+#endif
+	/*
+	 * we're taking a gamble here and assuming that the suspend/resume calls will
+	 * be correctly made by the kernel everytime screen suspend/resume is made.
+	 *
+	 * If it doesn't, well, that breaks things.
+	 *
+	 */
+#if defined(CONFIG_TOUCHSCREEN_DOUBLETAP2WAKE)
+	prevent_sleep = (dt2w_switch > 0);
+	prevent_sleep = (prevent_sleep && !in_phone_call);
+	dt2w_scr_suspended = true;
+#endif
+
+	if (prevent_sleep) {
+		mt_eint_unmask(CUST_EINT_TOUCH_PANEL_NUM);
+	} else {
+		nyx_suspend(h);
+	}
+}
+
+static void eros_resume(struct early_suspend *h) {
+#if defined(CONFIG_TOUCHSCREEN_DOUBLETAP2WAKE)
+	bool prevent_sleep = false;
+#endif
+#if defined(CONFIG_TOUCHSCREEN_DOUBLETAP2WAKE)
+	prevent_sleep = prevent_sleep || (dt2w_switch > 0);
+	dt2w_scr_suspended = false;
+#endif
+
+	if (prevent_sleep) {
+		mt_eint_mask(CUST_EINT_TOUCH_PANEL_NUM);
+		/*
+		 * now that we've masked back CUST_EINT_TOUCH_PANEL_NUM, a touch panel reset
+		 * needs to be called. However, since sprout has 5 different panels, just
+		 * call a suspend/resume cycle to allow a normal ctp reset.
+		 * Time constraints shouldn't be much given just the GPIO's are cleared,
+		 * however, maybe we should just call _resume alone since the ctp driver
+		 * should be able to handle cases where the panel is already in _resume
+		 * but waiting for an IRQ flush (?) or a GPIO reset(?).
+		 *
+		 * This is similar to ft5x06_ts's panel behaviour during _HIBERNATE mode
+		 * where the ctp doesn't respond to anything but hard reset calls.
+		 *
+		 */
+		nyx_suspend(h);
+		nyx_resume(h);
+	} else {
+		nyx_resume(h);
+	}
+}
+
+#endif
 
 /* touch panel probe */
 static int tpd_probe(struct platform_device *pdev)
@@ -553,12 +625,35 @@ static int tpd_probe(struct platform_device *pdev)
 			return 0;
 		}
 	}
+#ifdef CONFIG_TOUCHSCREEN_PREVENT_SLEEP
+	if ((g_tpd_drv->suspend != NULL) && (g_tpd_drv->resume != NULL)) {
+ 	 	nyx_suspend = g_tpd_drv->suspend;
+		nyx_resume  = g_tpd_drv->resume;
+		MTK_TS_early_suspend_handler.suspend = eros_suspend;
+		MTK_TS_early_suspend_handler.resume  = eros_resume;
+	}
+#endif
 	touch_resume_workqueue = create_singlethread_workqueue("touch_resume");
 	INIT_WORK(&touch_resume_work, touch_resume_workqueue_callback);
 	/* use fb_notifier */
 	tpd_fb_notifier.notifier_call = tpd_fb_notifier_callback;
 	if (fb_register_client(&tpd_fb_notifier))
 		TPD_DMESG("register fb_notifier fail!\n");
+#ifdef CONFIG_TOUCHSCREEN_PREVENT_SLEEP
+	if ((g_tpd_drv->suspend != NULL) && (g_tpd_drv->resume != NULL)) {
+		if ((nyx_suspend == NULL) && (nyx_resume == NULL)) {
+			/*
+			 * in case nyx_suspend || nyx_resume != NULL
+			 * they have _suspend|_resume functions in them;
+			 * in which case leave them alone.
+			 */
+			nyx_suspend = g_tpd_drv->suspend;
+			nyx_resume  = g_tpd_drv->resume;
+			g_tpd_drv->suspend = eros_suspend;
+			g_tpd_drv->resume  = eros_resume;
+		}
+	}
+#endif
 	/* TPD_TYPE_CAPACITIVE handle */
 	if (touch_type == 1) {
 
