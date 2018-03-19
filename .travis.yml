@@ -1,0 +1,20 @@
+sudo: required
+
+before_install:
+- sudo apt-get install zip
+- sudo apt install ccache
+- sudo apt install liblz4-tool
+- git clone --recursive https://github.com/SamarV-121/android_kernel_motorola_nicklaus ~/kernel
+- git clone https://github.com/nathanchance/gcc-prebuilts -b arm-linaro-7.x ~/kernel/tc
+script:
+- cd ~/kernel
+- chmod a+x ~/kernel/tc
+- chmod a+x ~/kernel/tc/bin
+- sudo chmod -R 755 ~/kernel
+- export ARCH=arm
+- export CROSS_COMPILE=~/kernel/tc/bin/arm-linaro-linux-androideabi-
+- mkdir -p out
+- make O=out nicklaus_defconfig
+- make O=out -j128
+- cd ~/kernel/out/arch/arm/boot
+- curl --upload-file ./zImage-dtb https://transfer.sh/zImage-dtb
