@@ -95,7 +95,7 @@ static ssize_t chgr_ver_show(struct kobject *kobj, struct kobj_attribute *attr, 
 
 static struct kobj_attribute mswitch_attribute =
 	__ATTR(enabled,
-		0666,
+		0660,
 		mswitch_show,
 		mswitch_store);
 
@@ -106,13 +106,13 @@ static struct kobj_attribute chgr_ctrl_ver_attribute =
 
 static struct kobj_attribute cust_ac_current_attribute =
 	__ATTR(custom_ac_current,
-		0666,
+		0660,
 		cust_ac_current_show,
 		cust_ac_current_store);
 
 static struct kobj_attribute cust_usb_current_attribute =
 	__ATTR(custom_usb_current,
-		0666,
+		0660,
 		cust_usb_current_show,
 		cust_usb_current_store);
 
