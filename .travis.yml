@@ -4,15 +4,14 @@ before_install:
 - sudo apt-get install zip
 - sudo apt install ccache
 - sudo apt install liblz4-tool
-- git clone --recursive https://github.com/SamarV-121/android_kernel_motorola_nicklaus ~/kernel
-- git clone https://github.com/nathanchance/gcc-prebuilts -b arm-linaro-7.x ~/kernel/tc
+- git clone --recursive https://github.com/SamarV-121/android_kernel_motorola_nicklaus -b nougat ~/kernel
 script:
 - cd ~/kernel
-- chmod a+x ~/kernel/tc
-- chmod a+x ~/kernel/tc/bin
+- chmod a+x ~/kernel/arm-linux-androideabi-4.9
+- chmod a+x ~/kernel/arm-linux-androideabi-4.9/bin
 - sudo chmod -R 755 ~/kernel
 - export ARCH=arm
-- export CROSS_COMPILE=~/kernel/tc/bin/arm-linaro-linux-androideabi-
+- export CROSS_COMPILE=~/kernel/arm-linux-androideabi-4.9/bin/arm-linux-androideabi-
 - mkdir -p out
 - make O=out nicklaus_defconfig
 - make O=out -j128
