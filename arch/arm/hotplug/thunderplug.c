@@ -22,7 +22,7 @@
 #include <linux/slab.h>
 #include <linux/cpu.h>
 #include <linux/cpufreq.h>
-#include <linux/powersuspend.h>
+#include <linux/earlysuspend.h>
 #include "thunderplug.h"
 
 #define DEBUG                        0
