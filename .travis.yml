@@ -4,7 +4,7 @@ before_install:
 - sudo apt-get install zip
 - sudo apt install ccache
 - sudo apt install liblz4-tool
-- git clone --recursive https://github.com/SamarV-121/android_kernel_motorola_nicklaus ~/kernel
+- git clone --recursive https://github.com/SamarV-121/android_kernel_motorola_nicklaus -b nougat ~/kernel
 script:
 - cd ~/kernel
 - chmod a+x ~/kernel/arm-linux-androideabi-4.9

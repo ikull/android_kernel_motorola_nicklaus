@@ -1541,10 +1541,7 @@ WLAN_STATUS nicPmIndicateBssConnected(IN P_ADAPTER_T prAdapter, IN ENUM_NETWORK_
 	ASSERT(prAdapter);
 	ASSERT(eNetworkTypeIdx < NETWORK_TYPE_INDEX_NUM);
 
-	if (eNetworkTypeIdx < NETWORK_TYPE_INDEX_NUM)
-		prBssInfo = &(prAdapter->rWifiVar.arBssInfo[eNetworkTypeIdx]);
-	else
-		return WLAN_STATUS_INVALID_LENGTH;
+	prBssInfo = &(prAdapter->rWifiVar.arBssInfo[eNetworkTypeIdx]);
 
 	rCmdIndicatePmBssConnected.ucNetTypeIndex = (UINT_8) eNetworkTypeIdx;
 	rCmdIndicatePmBssConnected.ucDtimPeriod = prBssInfo->ucDTIMPeriod;
