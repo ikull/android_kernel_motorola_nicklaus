@@ -465,6 +465,12 @@ config MOTO_AOD_BASE_ON_AP_SENSORS
 	bool "Support moto AOD feature base on AP sensors's built-in algos"
 	default n
 
+config MTK_WIFI_PM_CONTROL
+     tristate "Mediatek Wi-Fi PM Control"
+     default n
+     help
+     Interface to control Wi-Fi Power Saver Modes
+
 source "drivers/misc/mediatek/aee/Kconfig"
 source "drivers/misc/mediatek/atf_log/Kconfig"
 source "drivers/misc/mediatek/boot/Kconfig"
