@@ -682,9 +682,6 @@ static void devinfo_acc_regchar(char *module,char * vendor,char *version,char *u
 
 
 
-static void *I2CDMABuf_va = NULL;
-static dma_addr_t I2CDMABuf_pa;
-
 static int i2c_dma_read_fifo(struct i2c_client *client,
 		uint8_t regaddr, uint8_t *readbuf, int32_t readlen)
 {
@@ -701,7 +698,6 @@ static int i2c_dma_read_fifo(struct i2c_client *client,
 	msg.flags = client->flags & I2C_M_TEN;
 	msg.flags |= I2C_M_RD;
 	msg.len = readlen;
-	msg.buf = (char *)I2CDMABuf_pa;
 
 	ret = i2c_transfer(client->adapter, &msg, 1);
 	if (ret < 0) {
@@ -709,7 +705,6 @@ static int i2c_dma_read_fifo(struct i2c_client *client,
 		return -EFAULT;
 	}
 
-	memcpy(readbuf, I2CDMABuf_va, readlen);
 	return ret;
 }
 #endif
