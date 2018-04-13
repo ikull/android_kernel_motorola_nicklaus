@@ -25,7 +25,7 @@
 #include <linux/earlysuspend.h>
 #include "thunderplug.h"
 
-#define DEBUG                        0
+#define DEBUG                         1
 
 #define THUNDERPLUG                  "thunderplug"
 
