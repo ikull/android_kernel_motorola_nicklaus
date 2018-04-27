@@ -614,12 +614,11 @@ CONFIG_MTK_MD_SBP_CUSTOM_VALUE=0
 # CONFIG_SCHED_DEBUG is not set
 # CONFIG_DEBUG_PREEMPT is not set
 # 
+
+
+
 #add by longcheer liuzhenhe for led
 CONFIG_LCT_CHARGER_GREEN_LED=y
 CONFIG_LCT_FUNC_GREEN_LED=y
 #LCSH ADD by dingyin for thermal
 CONFIG_LCT_THERMAL_BACKLIGHT=y
-
-# Enable binder devices
-CONFIG_ANDROID_BINDER_DEVICES="binder,hwbinder,vndbinder" 
-CONFIG_ANDROID_BINDER_IPC_32BIT=y
